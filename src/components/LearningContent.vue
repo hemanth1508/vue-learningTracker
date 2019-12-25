@@ -6,7 +6,7 @@
     class="elevation-1 theme--light"
   >
     <template v-slot:item.topic="props">
-      <a :href="`${props.item.link}`" target="_block">
+      <a :href="`${props.item.link}`" target="_blank">
         {{ props.item.topic }}
       </a>
     </template>
@@ -30,11 +30,10 @@
               <v-container>
                 <v-row>
                   <v-col cols="12">
-                    <p>Category</p>
-
                     <v-overflow-btn
                       v-model="editedItem.category"
                       class="my-2"
+                      label="Category"
                       :items="dropdown_font"
                     ></v-overflow-btn>
                   </v-col>
@@ -81,6 +80,7 @@
   </v-data-table>
 </template>
 <script>
+import axios from "axios";
 export default {
   data: () => ({
     dialog: false,
@@ -88,7 +88,7 @@ export default {
       {
         text: "Date",
         align: "left",
-        sortable: false,
+        sortable: true,
         value: "date"
       },
       { text: "Topic", value: "topic" },
@@ -131,21 +131,12 @@ export default {
 
   methods: {
     initialize() {
-      this.desserts = [
-        {
-          date: "25-dec",
-          topic: "Frontend",
-          link:
-            "https://forum.vuejs.org/t/vue-cli-service-is-not-recognized-as-an-internal-external-command/63114",
-          category: "vue"
-        },
-        {
-          date: "24-dec",
-          topic: "Frontend",
-          link: "https://vuetifyjs.com/en/components/data-tables#data-tables",
-          category: "vuetify"
-        }
-      ];
+      let here = this;
+      axios
+        .get("https://c2iioe0ahf.execute-api.ap-south-1.amazonaws.com/dev/")
+        .then(function(response) {
+          here.desserts = response.data.Items;
+        });
     },
 
     editItem(item) {
@@ -195,12 +186,27 @@ export default {
 
     save() {
       this.setDate();
+      let here = this;
+      axios
+        .post(
+          "https://c2iioe0ahf.execute-api.ap-south-1.amazonaws.com/dev/",
+          this.editedItem
+        )
+        .then(function(response) {
+          if (response.data.status == "success") {
+            if (here.editedIndex > -1) {
+              Object.assign(here.desserts[here.editedIndex], here.editedItem);
+            } else {
+              here.desserts.push(here.editedItem);
+            }
+          } else {
+            alert("ERROR: Record not created.");
+          }
+        })
+        .catch(function(error) {
+          alert(error);
+        });
 
-      if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.desserts.push(this.editedItem);
-      }
       this.close();
     }
   }
