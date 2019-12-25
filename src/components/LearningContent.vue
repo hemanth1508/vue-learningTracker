@@ -67,10 +67,10 @@
       </v-toolbar>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-icon small class="mr-2" @click="editItem(item)">
+      <v-icon small class="mr-2" color="blue darken-1" @click="editItem(item)">
         edit
       </v-icon>
-      <v-icon small @click="deleteItem(item)">
+      <v-icon small color="red darken-1" @click="deleteItem(item)">
         delete
       </v-icon>
     </template>
